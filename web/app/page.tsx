@@ -113,7 +113,9 @@ export default async function Page() {
                   <td>
                     <span className={`pill ${job.status}`}>{job.status}</span>
                   </td>
-                  <td className="muted">{job.status === 'failed' ? `${job.error} · refunded` : ''}</td>
+                  <td className="muted">
+                    {job.status === 'failed' ? `${job.error} · refunded` : ''}
+                  </td>
                 </tr>
               ))}
             </tbody>

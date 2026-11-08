@@ -77,7 +77,11 @@ export class LedgerService {
           ])
           .session(session);
         const ledgerTotal = sum?.total ?? 0;
-        return { balance: account.balance, ledgerTotal, consistent: account.balance === ledgerTotal };
+        return {
+          balance: account.balance,
+          ledgerTotal,
+          consistent: account.balance === ledgerTotal,
+        };
       },
       { readConcern: { level: 'snapshot' } },
     );

@@ -1,0 +1,5 @@
+package-lock.json
+dist
+.next
+coverage
+next-env.d.ts

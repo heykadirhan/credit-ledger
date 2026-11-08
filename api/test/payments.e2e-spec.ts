@@ -13,12 +13,20 @@ describe('Payments', () => {
   afterAll(() => t.close());
 
   async function checkout(apiKey: string, packId = 'starter'): Promise<string> {
-    const res = await t.http.post('/checkout').set('x-api-key', apiKey).send({ packId }).expect(201);
+    const res = await t.http
+      .post('/checkout')
+      .set('x-api-key', apiKey)
+      .send({ packId })
+      .expect(201);
     return res.body.orderId;
   }
 
   function webhook(orderId: string, opts: { type?: string; secret?: string } = {}) {
-    const body = JSON.stringify({ eventId: randomUUID(), type: opts.type ?? 'order.paid', orderId });
+    const body = JSON.stringify({
+      eventId: randomUUID(),
+      type: opts.type ?? 'order.paid',
+      orderId,
+    });
     const signature = sign(body, opts.secret ?? TEST_WEBHOOK_SECRET);
     return {
       send: () =>

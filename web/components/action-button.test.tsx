@@ -62,7 +62,10 @@ describe('ActionButton', () => {
   });
 
   it('uses a new key once the server has answered', async () => {
-    const action = vi.fn(async (_key: string): Promise<ActionResult> => ({ ok: true, message: 'Started' }));
+    const action = vi.fn(async (_key: string): Promise<ActionResult> => ({
+      ok: true,
+      message: 'Started',
+    }));
     render(<ActionButton label="Render" action={action} />);
     const button = screen.getByRole('button', { name: 'Render' });
 
@@ -76,7 +79,10 @@ describe('ActionButton', () => {
   });
 
   it('shows the server refusing the action', async () => {
-    const action = vi.fn(async (): Promise<ActionResult> => ({ ok: false, message: 'Not enough credits' }));
+    const action = vi.fn(async (): Promise<ActionResult> => ({
+      ok: false,
+      message: 'Not enough credits',
+    }));
     render(<ActionButton label="Render" action={action} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Render' }));

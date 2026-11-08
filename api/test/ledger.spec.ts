@@ -57,7 +57,10 @@ describe('LedgerService', () => {
     const session = await t.connection.startSession();
     try {
       await expect(
-        ledger.apply({ accountId: id, delta: 1, reason: 'grant', refId: 'x', idempotencyKey: 'x' }, session),
+        ledger.apply(
+          { accountId: id, delta: 1, reason: 'grant', refId: 'x', idempotencyKey: 'x' },
+          session,
+        ),
       ).rejects.toThrow('must run inside a transaction');
     } finally {
       await session.endSession();

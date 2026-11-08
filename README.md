@@ -8,15 +8,15 @@ I run a credit system like this in production at QuickStaging, an AI photo tool 
 
 ## What the tests check
 
-| Scenario | What breaks without the safeguard |
-|---|---|
-| The same payment webhook arrives 50 times at once. The order is credited once. | Providers retry webhooks. A naive handler grants credits on every delivery. |
+| Scenario                                                                                                           | What breaks without the safeguard                                                |
+| ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| The same payment webhook arrives 50 times at once. The order is credited once.                                     | Providers retry webhooks. A naive handler grants credits on every delivery.      |
 | 50 jobs start at once against a balance that covers 33. Exactly 33 start, 17 get a 402, and the balance ends at 1. | A read-then-write balance check lets concurrent requests all pass and overspend. |
-| 20 requests share one Idempotency-Key. One job is created and charged once. | A double click or a client retry creates two jobs and charges twice. |
-| The same job failure is reported twice at once. It's refunded once. | Retry logic or a second worker refunds the same job twice. |
-| Two workers pick up the same job. It runs once. | The job runs, and costs us, twice. |
-| After each of these, the cached balance equals the sum of the ledger. | The two drift apart and nobody notices. |
-| In the UI, a double click sends one request, and a retry after a network error reuses the same key. | The frontend half of idempotency is missing. |
+| 20 requests share one Idempotency-Key. One job is created and charged once.                                        | A double click or a client retry creates two jobs and charges twice.             |
+| The same job failure is reported twice at once. It's refunded once.                                                | Retry logic or a second worker refunds the same job twice.                       |
+| Two workers pick up the same job. It runs once.                                                                    | The job runs, and costs us, twice.                                               |
+| After each of these, the cached balance equals the sum of the ledger.                                              | The two drift apart and nobody notices.                                          |
+| In the UI, a double click sends one request, and a retry after a network error reuses the same key.                | The frontend half of idempotency is missing.                                     |
 
 ```bash
 npm test
@@ -60,16 +60,16 @@ Open http://localhost:3000. The demo account starts with 100 credits. The fake p
 
 ## API
 
-| Method | Path | Auth | Notes |
-|---|---|---|---|
-| GET | `/me` | `x-api-key` | Name and balance |
-| GET | `/me/ledger` | `x-api-key` | Last 50 entries |
-| GET | `/me/reconcile` | `x-api-key` | Balance and ledger total, read from one snapshot |
-| POST | `/checkout` | `x-api-key` | `{ packId }` creates a pending order |
-| POST | `/webhooks/payments` | `x-signature` | `order.paid` credits the order |
-| POST | `/jobs` | `x-api-key`, `Idempotency-Key` | `{ kind }`. 201 new, 200 replay, 402 not enough credits, 422 key reused for a different request |
-| GET | `/jobs` | `x-api-key` | Last 20 jobs |
-| POST | `/dev/fake-provider/pay/:orderId` | `x-api-key` | Dev only, needs `FAKE_PROVIDER=true` |
+| Method | Path                              | Auth                           | Notes                                                                                           |
+| ------ | --------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------- |
+| GET    | `/me`                             | `x-api-key`                    | Name and balance                                                                                |
+| GET    | `/me/ledger`                      | `x-api-key`                    | Last 50 entries                                                                                 |
+| GET    | `/me/reconcile`                   | `x-api-key`                    | Balance and ledger total, read from one snapshot                                                |
+| POST   | `/checkout`                       | `x-api-key`                    | `{ packId }` creates a pending order                                                            |
+| POST   | `/webhooks/payments`              | `x-signature`                  | `order.paid` credits the order                                                                  |
+| POST   | `/jobs`                           | `x-api-key`, `Idempotency-Key` | `{ kind }`. 201 new, 200 replay, 402 not enough credits, 422 key reused for a different request |
+| GET    | `/jobs`                           | `x-api-key`                    | Last 20 jobs                                                                                    |
+| POST   | `/dev/fake-provider/pay/:orderId` | `x-api-key`                    | Dev only, needs `FAKE_PROVIDER=true`                                                            |
 
 ## Not production-ready yet
 

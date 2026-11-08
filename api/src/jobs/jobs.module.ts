@@ -10,7 +10,11 @@ import { JobsService } from './jobs.service';
 import { FakeRenderEngine, RENDER_ENGINE } from './render-engine';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]), LedgerModule, AccountsModule],
+  imports: [
+    MongooseModule.forFeature([{ name: Job.name, schema: JobSchema }]),
+    LedgerModule,
+    AccountsModule,
+  ],
   controllers: [JobsController],
   providers: [
     JobsService,
