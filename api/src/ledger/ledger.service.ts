@@ -1,0 +1,92 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { ClientSession, Connection, Model, Types } from 'mongoose';
+import { Account } from '../accounts/account.schema';
+import { LedgerEntry, LedgerReason } from './ledger-entry.schema';
+
+export class InsufficientCreditsError extends HttpException {
+  constructor() {
+    super('Insufficient credits', HttpStatus.PAYMENT_REQUIRED);
+  }
+}
+
+export interface LedgerChange {
+  accountId: Types.ObjectId;
+  delta: number;
+  reason: LedgerReason;
+  refId: string;
+  idempotencyKey: string;
+}
+
+export interface Reconciliation {
+  balance: number;
+  ledgerTotal: number;
+  consistent: boolean;
+}
+
+@Injectable()
+export class LedgerService {
+  constructor(
+    @InjectModel(Account.name) private readonly accounts: Model<Account>,
+    @InjectModel(LedgerEntry.name) private readonly entries: Model<LedgerEntry>,
+    @InjectConnection() private readonly connection: Connection,
+  ) {}
+
+  /**
+   * The only place a balance changes. Runs in the caller's transaction so the
+   * balance and the entry commit together. Returns false if the key was used.
+   */
+  async apply(change: LedgerChange, session: ClientSession): Promise<boolean> {
+    if (!session.inTransaction()) {
+      throw new Error('LedgerService.apply must run inside a transaction');
+    }
+
+    const existing = await this.entries
+      .exists({ idempotencyKey: change.idempotencyKey })
+      .session(session);
+    if (existing) return false;
+
+    // Check and decrement in one update, so concurrent debits can't overspend.
+    // Write conflicts between transactions are retried by connection.transaction().
+    const filter =
+      change.delta < 0
+        ? { _id: change.accountId, balance: { $gte: -change.delta } }
+        : { _id: change.accountId };
+
+    const account = await this.accounts.findOneAndUpdate(
+      filter,
+      { $inc: { balance: change.delta } },
+      { new: true, session },
+    );
+    if (!account) {
+      // The caller is authenticated, so no match means the balance is too low.
+      if (change.delta < 0) throw new InsufficientCreditsError();
+      throw new Error(`Account ${String(change.accountId)} not found`);
+    }
+
+    await this.entries.create([{ ...change, balanceAfter: account.balance }], { session });
+    return true;
+  }
+
+  list(accountId: Types.ObjectId, limit = 50) {
+    return this.entries.find({ accountId }).sort({ createdAt: -1, _id: -1 }).limit(limit).lean();
+  }
+
+  /** Balance vs. ledger total, both read from one snapshot. */
+  async reconcile(accountId: Types.ObjectId): Promise<Reconciliation> {
+    return this.connection.transaction<Reconciliation>(
+      async (session) => {
+        const account = await this.accounts.findById(accountId).session(session).orFail();
+        const [sum] = await this.entries
+          .aggregate<{ total: number }>([
+            { $match: { accountId } },
+            { $group: { _id: null, total: { $sum: '$delta' } } },
+          ])
+          .session(session);
+        const ledgerTotal = sum?.total ?? 0;
+        return { balance: account.balance, ledgerTotal, consistent: account.balance === ledgerTotal };
+      },
+      { readConcern: { level: 'snapshot' } },
+    );
+  }
+}
