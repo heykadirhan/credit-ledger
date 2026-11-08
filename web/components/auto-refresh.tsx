@@ -1,0 +1,17 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+/** Re-fetches the server component every second while `active` is true. */
+export function AutoRefresh({ active }: { active: boolean }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!active) return;
+    const id = setInterval(() => router.refresh(), 1000);
+    return () => clearInterval(id);
+  }, [active, router]);
+
+  return null;
+}
