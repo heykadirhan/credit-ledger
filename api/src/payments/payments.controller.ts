@@ -22,7 +22,7 @@ export class PaymentsController {
   }
 
   @Post('webhooks/payments')
-  @HttpCode(200)
+  @HttpCode(200) // also for duplicates, otherwise the provider keeps retrying
   @UseGuards(SignatureGuard)
   async webhook(@Body() event: PaymentWebhookDto): Promise<{ status: WebhookOutcome }> {
     if (event.type !== 'order.paid') return { status: 'ignored' };

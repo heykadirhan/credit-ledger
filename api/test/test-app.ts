@@ -76,6 +76,7 @@ export async function createTestApp(dbName: string) {
     },
 
     async reset(): Promise<void> {
+      // deleteMany, not drop: dropping a collection also drops its unique indexes.
       await Promise.all(Object.values(connection.collections).map((c) => c.deleteMany({})));
       queue.enqueued.length = 0;
       engine.runs = 0;

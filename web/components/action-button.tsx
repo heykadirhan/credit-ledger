@@ -15,6 +15,7 @@ export function ActionButton({ label, action }: Props) {
   const keyAwaitingAnswer = useRef<string | null>(null);
 
   function handleClick() {
+    // `disabled` only applies after a re-render, and a fast second click can land before that.
     if (inFlight.current) return;
     inFlight.current = true;
 

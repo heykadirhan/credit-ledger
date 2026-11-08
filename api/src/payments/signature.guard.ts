@@ -14,6 +14,7 @@ export class SignatureGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<RawBodyRequest<Request>>();
     const signature = req.header('x-signature');
+    // Raw bytes, because re-serialized JSON may not match what the provider signed.
     if (!signature || !req.rawBody || !verifySignature(req.rawBody, signature, webhookSecret())) {
       throw new UnauthorizedException('Invalid signature');
     }

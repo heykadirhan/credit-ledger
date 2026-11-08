@@ -42,6 +42,7 @@ export class LedgerService {
       .session(session);
     if (existing) return false;
 
+    // A concurrent debit gets a write conflict here, and connection.transaction() retries it.
     const onlyIfBalanceCoversDebit =
       change.delta < 0
         ? { _id: change.accountId, balance: { $gte: -change.delta } }
