@@ -12,7 +12,6 @@ import { RENDER_ENGINE, RenderEngine } from '../src/jobs/render-engine';
 
 export const TEST_WEBHOOK_SECRET = 'test-webhook-secret';
 
-/** Records job ids so each test decides when a job runs. */
 export class ManualJobQueue implements JobQueue {
   readonly enqueued: string[] = [];
 
@@ -21,21 +20,23 @@ export class ManualJobQueue implements JobQueue {
   }
 }
 
+function letOtherCallsRun(): Promise<void> {
+  return new Promise((resolve) => setImmediate(resolve));
+}
+
 export class ScriptedRenderEngine implements RenderEngine {
   runs = 0;
   failWith: string | null = null;
 
   async run(): Promise<void> {
     this.runs++;
-    // Yield once so concurrent callers really overlap.
-    await new Promise((resolve) => setImmediate(resolve));
+    await letOtherCallsRun();
     if (this.failWith) throw new Error(this.failWith);
   }
 }
 
 export type TestApp = Awaited<ReturnType<typeof createTestApp>>;
 
-// Real AppModule, own database. Only the queue and render engine are fakes.
 export async function createTestApp(dbName: string) {
   process.env.MONGO_DB = dbName;
   process.env.WEBHOOK_SECRET = TEST_WEBHOOK_SECRET;
@@ -53,7 +54,6 @@ export async function createTestApp(dbName: string) {
   const app = moduleRef.createNestApplication({ rawBody: true });
   configureApp(app);
   await ensureIndexes(app);
-  // Real port, so concurrent requests use real HTTP connections.
   await app.listen(0, '127.0.0.1');
   const { port } = app.getHttpServer().address() as AddressInfo;
   const connection = app.get<Connection>(getConnectionToken());
@@ -76,7 +76,6 @@ export async function createTestApp(dbName: string) {
     },
 
     async reset(): Promise<void> {
-      // deleteMany, not drop: drop would remove the indexes too.
       await Promise.all(Object.values(connection.collections).map((c) => c.deleteMany({})));
       queue.enqueued.length = 0;
       engine.runs = 0;

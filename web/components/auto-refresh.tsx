@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-/** Re-fetches the server component every second while `active` is true. */
 export function AutoRefresh({ active }: { active: boolean }) {
   const router = useRouter();
 

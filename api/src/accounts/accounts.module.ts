@@ -8,7 +8,6 @@ import { MeController } from './me.controller';
   imports: [LedgerModule],
   controllers: [MeController],
   providers: [AccountsService, DemoSeed],
-  // ApiKeyGuard needs it in other modules.
   exports: [AccountsService],
 })
 export class AccountsModule {}

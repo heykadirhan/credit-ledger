@@ -13,7 +13,6 @@ export interface AuthedRequest extends Request {
   account: AccountDocument;
 }
 
-/** Looks up the account for the x-api-key header and puts it on the request. */
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   constructor(private readonly accounts: AccountsService) {}
@@ -28,7 +27,6 @@ export class ApiKeyGuard implements CanActivate {
   }
 }
 
-/** Only valid on routes behind ApiKeyGuard. */
 export const CurrentAccount = createParamDecorator(
   (_data: unknown, context: ExecutionContext): AccountDocument =>
     context.switchToHttp().getRequest<AuthedRequest>().account,

@@ -37,7 +37,6 @@ export interface LedgerEntryView {
   createdAt: string;
 }
 
-// Button labels only. Real prices live in the API (payments/packs.ts, jobs/job.schema.ts).
 export const PACK_OPTIONS = [
   { id: 'starter', credits: 50, price: '$9' },
   { id: 'pro', credits: 200, price: '$29' },

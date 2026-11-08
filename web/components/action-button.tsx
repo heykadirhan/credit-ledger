@@ -11,23 +11,20 @@ interface Props {
 export function ActionButton({ label, action }: Props) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<ActionResult | null>(null);
-  // Refs: read synchronously in the handler, and no re-render on change.
   const inFlight = useRef(false);
-  const pendingKey = useRef<string | null>(null);
+  const keyAwaitingAnswer = useRef<string | null>(null);
 
   function handleClick() {
-    // A second click can land before React re-renders the button as disabled.
     if (inFlight.current) return;
     inFlight.current = true;
 
-    // Keep the key until the server answers, so a retry can't run twice.
-    pendingKey.current ??= crypto.randomUUID();
-    const key = pendingKey.current;
+    keyAwaitingAnswer.current ??= crypto.randomUUID();
+    const key = keyAwaitingAnswer.current;
 
     startTransition(async () => {
       try {
         const res = await action(key);
-        pendingKey.current = null;
+        keyAwaitingAnswer.current = null;
         setResult(res);
       } catch {
         setResult({ ok: false, message: 'Request failed. Click again to retry safely.' });

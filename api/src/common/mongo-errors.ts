@@ -1,4 +1,9 @@
-/** MongoDB error 11000: a write broke a unique index. */
+const DUPLICATE_KEY_ERROR_CODE = 11000;
+
 export function isDuplicateKeyError(err: unknown): boolean {
-  return typeof err === 'object' && err !== null && (err as { code?: unknown }).code === 11000;
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    (err as { code?: unknown }).code === DUPLICATE_KEY_ERROR_CODE
+  );
 }

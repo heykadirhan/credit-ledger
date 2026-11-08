@@ -9,18 +9,15 @@ export class LedgerEntry {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Account', required: true })
   accountId!: Types.ObjectId;
 
-  /** Positive adds credits, negative spends them. */
   @Prop({ required: true })
   delta!: number;
 
   @Prop({ required: true, enum: LEDGER_REASONS })
   reason!: LedgerReason;
 
-  /** Id of the order, job or account this entry is about. */
   @Prop({ required: true })
   refId!: string;
 
-  /** e.g. "purchase:<orderId>". Unique, so one event can't change the balance twice. */
   @Prop({ required: true, unique: true })
   idempotencyKey!: string;
 

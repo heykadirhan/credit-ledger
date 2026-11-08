@@ -15,12 +15,7 @@ export class JobProcessor {
   ) {}
 
   async process(jobId: string): Promise<void> {
-    // Claim it. Only one worker can move a job out of "queued".
-    const job = await this.jobs.findOneAndUpdate(
-      { _id: jobId, status: 'queued' },
-      { $set: { status: 'running' } },
-      { new: true },
-    );
+    const job = await this.claimQueuedJob(jobId);
     if (!job) return;
 
     try {
@@ -36,7 +31,14 @@ export class JobProcessor {
     );
   }
 
-  /** Fails the job and refunds it. Safe to call twice (status filter + refund key). */
+  private claimQueuedJob(jobId: string) {
+    return this.jobs.findOneAndUpdate(
+      { _id: jobId, status: 'queued' },
+      { $set: { status: 'running' } },
+      { new: true },
+    );
+  }
+
   async fail(jobId: string, reason: string): Promise<void> {
     await this.connection.transaction(async (session) => {
       const job = await this.jobs.findOneAndUpdate(

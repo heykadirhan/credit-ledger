@@ -18,7 +18,6 @@ jobs:
 
       - run: npm ci
       - run: npm run typecheck
-      # The API tests download a MongoDB binary on first run (about 80 MB).
       - run: npm test
       - run: npm run build -w api
       - run: npm run build -w web

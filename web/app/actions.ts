@@ -26,7 +26,6 @@ export async function buyPack(packId: PackId): Promise<ActionResult> {
     method: 'POST',
     body: JSON.stringify({ packId }),
   });
-  // Pretend the customer paid on the provider's checkout page.
   const { deliveries } = await api<{ deliveries: string[] }>(
     `/dev/fake-provider/pay/${order.orderId}`,
     { method: 'POST' },

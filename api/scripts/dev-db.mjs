@@ -1,5 +1,3 @@
-// Local MongoDB replica set in memory (transactions need a replica set).
-// No MongoDB or Docker install needed. Data is gone when this stops.
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 const replSet = await MongoMemoryReplSet.create({

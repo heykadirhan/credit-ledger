@@ -4,10 +4,8 @@ import { ApiKeyGuard } from '../accounts/api-key.guard';
 import { fakeProviderEnabled, port, webhookSecret } from '../config';
 import { sign } from './signature';
 
-const DELIVERIES = 3;
+const DELIVERIES_PER_PAYMENT = 3;
 
-// Dev only. "Pays" an order by sending its webhook three times at once,
-// like a provider retrying.
 @Controller('dev/fake-provider')
 export class FakeProviderController {
   @Post('pay/:orderId')
@@ -23,7 +21,7 @@ export class FakeProviderController {
     };
 
     const deliveries = await Promise.all(
-      Array.from({ length: DELIVERIES }, async () => {
+      Array.from({ length: DELIVERIES_PER_PAYMENT }, async () => {
         const res = await fetch(`http://127.0.0.1:${port()}/webhooks/payments`, {
           method: 'POST',
           headers,

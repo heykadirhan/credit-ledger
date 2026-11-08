@@ -36,7 +36,6 @@ describe('ActionButton', () => {
     render(<ActionButton label="Render" action={action} />);
     const button = screen.getByRole('button', { name: 'Render' });
 
-    // Same act(), so `disabled` isn't committed before the second click.
     act(() => {
       button.click();
       button.click();

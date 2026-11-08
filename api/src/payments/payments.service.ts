@@ -25,10 +25,8 @@ export class PaymentsService {
     });
   }
 
-  /** order.paid. Providers retry, sometimes in parallel, so this must be safe to repeat. */
   async markPaid(orderId: string): Promise<WebhookOutcome> {
     return this.connection.transaction<WebhookOutcome>(async (session) => {
-      // pending -> paid only, so a repeat delivery matches nothing.
       const order = await this.orders.findOneAndUpdate(
         { _id: orderId, status: 'pending' },
         { $set: { status: 'paid', paidAt: new Date() } },
@@ -40,7 +38,6 @@ export class PaymentsService {
         return 'duplicate';
       }
 
-      // Same transaction as the status change.
       const applied = await this.ledger.apply(
         {
           accountId: order.accountId,

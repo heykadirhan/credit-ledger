@@ -5,6 +5,5 @@ export default async function globalSetup(): Promise<void> {
     replSet: { count: 1, storageEngine: 'wiredTiger' },
   });
   (globalThis as { __MONGO_REPLSET__?: MongoMemoryReplSet }).__MONGO_REPLSET__ = replSet;
-  // Workers inherit this; each suite uses its own database.
   process.env.MONGO_URL = replSet.getUri();
 }

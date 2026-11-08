@@ -1,5 +1,3 @@
-// Read at call time, not import time, so tests can set them first.
-
 export function mongoUri(): string {
   return process.env.MONGO_URL ?? 'mongodb://127.0.0.1:27017/?replicaSet=rs0';
 }

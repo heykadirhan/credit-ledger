@@ -21,7 +21,6 @@ export class AccountsService {
     return this.accounts.findOne({ apiKeyHash: hashApiKey(apiKey) });
   }
 
-  /** Starting credits go through the ledger like any other change. */
   async create(name: string, apiKey: string, startingCredits: number): Promise<AccountDocument> {
     const id = await this.connection.transaction(async (session) => {
       const [account] = await this.accounts.create([{ name, apiKeyHash: hashApiKey(apiKey) }], {

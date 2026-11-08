@@ -7,7 +7,6 @@ import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
-    // Async so tests can set MONGO_DB before the connection opens.
     MongooseModule.forRootAsync({
       useFactory: () => ({ uri: mongoUri(), dbName: mongoDbName() }),
     }),

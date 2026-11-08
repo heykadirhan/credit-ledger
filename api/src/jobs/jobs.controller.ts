@@ -27,7 +27,7 @@ export class JobsController {
     if (created) {
       this.queue.enqueue(job.id);
     } else {
-      res.status(HttpStatus.OK); // replay, not a new job
+      res.status(HttpStatus.OK);
     }
     return toJobView(job);
   }

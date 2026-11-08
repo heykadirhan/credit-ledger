@@ -6,11 +6,9 @@ export class Account {
   @Prop({ required: true })
   name!: string;
 
-  /** SHA-256 of the API key. The key itself is never stored. */
   @Prop({ required: true, unique: true })
   apiKeyHash!: string;
 
-  /** Cached ledger total. Only LedgerService.apply writes it. */
   @Prop({ required: true, default: 0 })
   balance!: number;
 }

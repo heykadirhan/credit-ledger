@@ -17,7 +17,6 @@ describe('Payments', () => {
     return res.body.orderId;
   }
 
-  // One signed event. send() delivers the same event again.
   function webhook(orderId: string, opts: { type?: string; secret?: string } = {}) {
     const body = JSON.stringify({ eventId: randomUUID(), type: opts.type ?? 'order.paid', orderId });
     const signature = sign(body, opts.secret ?? TEST_WEBHOOK_SECRET);
@@ -76,7 +75,6 @@ describe('Payments', () => {
 
     const responses = await Promise.all(Array.from({ length: 50 }, () => event.send()));
 
-    // Every delivery gets a 200, or the provider would keep retrying.
     expect(responses.map((r) => r.status)).toEqual(Array(50).fill(200));
     expect(responses.filter((r) => r.body.status === 'credited')).toHaveLength(1);
     expect(responses.filter((r) => r.body.status === 'duplicate')).toHaveLength(49);

@@ -7,7 +7,6 @@ import { JOB_COSTS, Job, JobDocument, JobKind } from './job.schema';
 
 export interface CreateJobResult {
   job: JobDocument;
-  /** False when the Idempotency-Key matched an earlier job. */
   created: boolean;
 }
 
@@ -19,7 +18,6 @@ export class JobsService {
     private readonly ledger: LedgerService,
   ) {}
 
-  /** Creates and charges in one transaction. A repeated key returns the original job. */
   async create(
     accountId: Types.ObjectId,
     kind: JobKind,
@@ -48,10 +46,9 @@ export class JobsService {
       });
       return { job, created: true };
     } catch (err) {
-      // Lost the race to a concurrent request with the same key.
       if (isDuplicateKeyError(err)) {
-        const winner = await this.jobs.findOne({ accountId, idempotencyKey });
-        if (winner) return this.replay(winner, kind);
+        const jobFromConcurrentRequest = await this.jobs.findOne({ accountId, idempotencyKey });
+        if (jobFromConcurrentRequest) return this.replay(jobFromConcurrentRequest, kind);
       }
       throw err;
     }

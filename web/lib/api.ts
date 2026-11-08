@@ -1,6 +1,5 @@
 import 'server-only';
 
-// server-only keeps API_KEY out of the browser bundle.
 const API_URL = process.env.API_URL ?? 'http://localhost:4000';
 
 export class ApiError extends Error {

@@ -16,14 +16,12 @@ export class Job {
   @Prop({ required: true, enum: JOB_KINDS })
   kind!: JobKind;
 
-  /** Credits charged when the job was created, and refunded if it fails. */
   @Prop({ required: true })
   cost!: number;
 
   @Prop({ required: true, enum: JOB_STATUSES, default: 'queued' })
   status!: JobStatus;
 
-  /** The client's Idempotency-Key header. Unique per account. */
   @Prop({ required: true })
   idempotencyKey!: string;
 
